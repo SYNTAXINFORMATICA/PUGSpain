@@ -1,0 +1,42 @@
+https://www.sqlbi.com/articles/compare-equivalent-periods-in-dax/
+
+
+YTD-AA-SDIs = 
+VAR UltimoDia = 
+	LASTNONBLANK (Calendario[Date];CALCULATE ( sum(Solicitudes[Nº SDIs Total]) ) )
+VAR UltimoDiaAbsoluto = 
+	LASTNONBLANK (
+        Calendario[Date];
+        CALCULATE ( sum(Solicitudes[Nº SDIs Total]); ALLEXCEPT ( Solicitudes; 'Calendario' ) ) )
+VAR RangoActual =
+	DATESBETWEEN ( Calendario[Date]; MIN ( Calendario[Date] ); UltimoDiaAbsoluto )
+VAR RangoAnterior =
+	//SAMEPERIODLASTYEAR ( RangoActual )
+	DATESBETWEEN ( Calendario[Date]; DATEADD(FIRSTDATE(RangoActual);-1;YEAR); DATEADD(UltimoDiaAbsoluto;-1;YEAR) )
+RETURN
+	IF (
+        	UltimoDiaAbsoluto >= MIN ( Calendario[Date] );
+	        CALCULATE ( sum(Solicitudes[Nº SDIs Total]); RangoAnterior )
+	)
+
+
+
+
+
+
+
+YTD-AA-SDIs = 
+VAR LastDayAbsolute = LASTNONBLANK (
+        Calendario[Date];
+        CALCULATE ( sum(Solicitudes[Nº SDIs Total]); ALLEXCEPT ( Solicitudes; 'Calendario' ) ) )
+//VAR FirstDayYearAbsolute = DATE(1;1;YEAR(LastDayAbsolute)-1)
+VAR CurrentRange =
+    DATESBETWEEN ( Calendario[Date]; MIN ( Calendario[Date] ); LastDayAbsolute )
+VAR PreviousRange =
+    //SAMEPERIODLASTYEAR ( CurrentRange )
+	DATESBETWEEN ( Calendario[Date]; DATEADD(FIRSTDATE(CurrentRange);-1;YEAR); DATEADD(LastDayAbsolute;-1;YEAR) )
+RETURN
+    IF (
+        LastDayAbsolute >= MIN ( Calendario[Date] );
+        CALCULATE ( sum(Solicitudes[Nº SDIs Total]); PreviousRange )
+    )		
